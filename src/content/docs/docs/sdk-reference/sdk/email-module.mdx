@@ -6,18 +6,18 @@ description: Deprecated SDK reference for the removed bifrost.email module
 import { Aside } from '@astrojs/starlight/components';
 
 <Aside type="danger" title="Deprecated">
-The `bifrost.email` module was removed after **v1.0.0** (first release without it: **v1.0.5**), along with **Settings → Email**
-and `POST /api/email/send`. It is not part of current main and will not work on a
+The `bifrost.email` module was removed in [Bifrost PR #273](https://github.com/gobifrost/bifrost/pull/273), before **v1.0.0**, along with **Settings → Email**
+and `POST /api/email/send`. Both **v1.0.0** and **v1.0.5** already lack these features. It is not part of current main and will not work on a
 current Bifrost instance.
 
 Use an event-driven workflow with your own email provider instead. See
 [Sending Email](/docs/how-to-guides/workflows/sending-email/).
 </Aside>
 
-This page is retained as a historical reference for versions **v1.0.0 and earlier**.
+This page is retained as a historical reference for revisions before that removal.
 Do not use it for new work.
 
-## Historical reference (v1.0.0 and earlier)
+## Historical reference (before removal)
 
 The `email` module sent transactional email through the platform's configured email
 workflow. A platform admin had to configure an email workflow under **Settings → Email**

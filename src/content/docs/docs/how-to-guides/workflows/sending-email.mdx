@@ -6,7 +6,9 @@ description: Send transactional email from a workflow using your own provider an
 import { Aside } from '@astrojs/starlight/components';
 
 Current Bifrost has no built-in email SDK and no **Settings → Email** page. The
-`bifrost.email` module and the platform email workflow were removed after **v1.0.0** (first release without them: **v1.0.5**).
+`bifrost.email` module, platform email configuration, and `POST /api/email/send`
+were removed in [Bifrost PR #273](https://github.com/gobifrost/bifrost/pull/273),
+before the **v1.0.0** release. They are absent from both **v1.0.0** and **v1.0.5**.
 Email delivery is now an ordinary workflow responsibility: call your provider from
 a workflow, and trigger that workflow with an event.
 
@@ -22,8 +24,8 @@ is the usual choice for a shared notification workflow; use an organization-scop
 value when a single customer has its own sender.
 
 ```sh
-bifrost config set smtp2go_api_key --value "<api-key>" --type secret --global
-bifrost config set smtp2go_from_address --value "notifications@example.com" --type string --global
+bifrost configs set smtp2go_api_key --value "<api-key>" --type secret --global
+bifrost configs set smtp2go_from_address --value "notifications@example.com" --type string --global
 ```
 
 Read them inside the workflow with `config.get()`. The value resolves through the
@@ -76,9 +78,20 @@ async def send_email_requested():
             },
         )
         response.raise_for_status()
+        result = response.json().get("data", {})
+        if result.get("error") or result.get("error_code") or result.get("failed") or result.get("failures"):
+            raise RuntimeError("Email provider rejected all or part of the request")
+        if not result.get("email_id"):
+            raise RuntimeError("Email provider did not confirm acceptance")
 
-    return {"sent": True, "recipients": recipients}
+    return {"accepted": True, "email_id": result["email_id"]}
 ```
+
+SMTP2GO can return HTTP 200 with processing failures, so the example also checks
+its response body. With `fastaccept`, success means the provider accepted the
+message for background processing. Use provider delivery webhooks or logs to
+confirm arrival; Bifrost execution success alone does not prove delivery. See the
+[SMTP2GO send API](https://developers.smtp2go.com/reference/send-standard-email).
 
 ## Emit the event
 
@@ -99,9 +112,13 @@ async def request_invoice_email(recipient: str, invoice_url: str):
     return {"queued": True}
 ```
 
-`events.emit()` returns immediately; the subscription runs the sending workflow in
-the source's organization scope. Check the source's delivery log and the workflow's
-execution history to confirm delivery.
+`events.emit()` returns after publishing and queuing the event, without waiting
+for the sending workflow to finish. The sending workflow runs in its own
+organization scope, not the event source's scope. An organization-scoped workflow
+therefore reads that organization's configuration; a global workflow reads global
+configuration. To use a customer's sender, scope the sending workflow to that
+customer's organization. Check the source's delivery log and workflow execution
+history for processing status, and the provider's delivery records for arrival.
 
 ## Why an event instead of a direct call
 
