@@ -219,6 +219,10 @@ export default {
                                     slug: "docs/how-to-guides/workflows/writing-workflows",
                                 },
                                 {
+                                    label: "Sending Email",
+                                    slug: "docs/how-to-guides/workflows/sending-email",
+                                },
+                                {
                                     label: "Using Decorators",
                                     slug: "docs/how-to-guides/workflows/using-decorators",
                                 },
@@ -585,6 +589,7 @@ export default {
                                 {
                                     label: "Email Module",
                                     slug: "docs/sdk-reference/sdk/email-module",
+                                    badge: { text: "Deprecated", variant: "danger" },
                                 },
                                 {
                                     label: "Executions Module",
