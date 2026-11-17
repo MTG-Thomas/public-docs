@@ -34,5 +34,8 @@
     "zod": "^4.4.3"
   },
   "private": true,
-  "description": "Public product documentation for Bifrost"
+  "description": "Public product documentation for Bifrost",
+  "overrides": {
+    "postcss-selector-parser": "^6.1.5"
+  }
 }
